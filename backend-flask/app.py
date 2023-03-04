@@ -13,6 +13,11 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 
+#aws x-ray -----------------
+# Import the X-Ray modules
+from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+from aws_xray_sdk.core import patcher, xray_recorder
+
 #Honeycomb----------------
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
@@ -27,10 +32,19 @@ provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 tracer = trace.get_tracer(__name__)
 
+# Patch the requests module to enable automatic instrumentation
+patcher.patch(('requests',))
+
 app = Flask(__name__)
 
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
+
+# Configure the X-Ray recorder to generate segments with our service name
+xray_recorder.configure(service='My First Serverless App')
+# Instrument the Flask application
+XRayMiddleware(app, xray_recorder)
+
 
 frontend = os.getenv('FRONTEND_URL')
 backend = os.getenv('BACKEND_URL')
@@ -42,6 +56,7 @@ cors = CORS(
   allow_headers="content-type,if-modified-since",
   methods="OPTIONS,GET,HEAD,POST"
 )
+
 
 @app.route("/api/message_groups", methods=['GET'])
 def data_message_groups():
