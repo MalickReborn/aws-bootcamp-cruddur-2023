@@ -15,8 +15,14 @@ from services.show_activity import *
 
 #aws x-ray -----------------
 # Import the X-Ray modules
+from aws_xray_sdk import global_sdk_config
 from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-from aws_xray_sdk.core import patcher, xray_recorder
+from aws_xray_sdk.core.context import Context
+from aws_xray_sdk.core import lambda_launcher
+from aws_xray_sdk.core.models import http, facade_segment, segment
+#from tests.util import get_new_stubbed_recorder
+import os
+
 
 #Honeycomb----------------
 from opentelemetry import trace
