@@ -13,15 +13,6 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 
-#aws x-ray -----------------
-# Import the X-Ray modules
-from aws_xray_sdk import global_sdk_config
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-from aws_xray_sdk.core.context import Context
-from aws_xray_sdk.core import lambda_launcher
-from aws_xray_sdk.core.models import http, facade_segment, segment
-#from tests.util import get_new_stubbed_recorder
-import os
 
 
 #Honeycomb----------------
@@ -31,6 +22,19 @@ from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+#aws x-ray -----------------
+# Import the X-Ray modules
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk import global_sdk_config
+from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+from aws_xray_sdk.core.context import Context
+from aws_xray_sdk.core import lambda_launcher
+from aws_xray_sdk.core.models import http, facade_segment, segment
+#from tests.util import get_new_stubbed_recorder
+import os
+
     #honeycomb
 provider = TracerProvider()
 processor = BatchSpanProcessor(OTLPSpanExporter())
@@ -39,17 +43,23 @@ trace.set_tracer_provider(provider)
 tracer = trace.get_tracer(__name__)
 
 # Patch the requests module to enable automatic instrumentation
-patcher.patch(('requests',))
+#patcher.patch(('requests',))
+
+# X-RAY ----------
+xray_url = os.getenv("AWS_XRAY_URL")
+xray_recorder.configure(service='backend-flask', dynamic_naming=xray_url)
+# Instrument the Flask application
+#XRayMiddleware(app, xray_recorder)
+
+# Show this in the logs within the backend-flask app (STDOUT)
+simple_processor = SimpleSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(simple_processor)
 
 app = Flask(__name__)
 
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
-# Configure the X-Ray recorder to generate segments with our service name
-xray_recorder.configure(service='My First Serverless App')
-# Instrument the Flask application
-XRayMiddleware(app, xray_recorder)
 
 
 frontend = os.getenv('FRONTEND_URL')
