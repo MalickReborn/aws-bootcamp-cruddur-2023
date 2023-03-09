@@ -1,3 +1,5 @@
+
+
 from flask import Flask
 from flask import request
 from flask_cors import CORS, cross_origin
@@ -13,8 +15,12 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 
-
-
+#Rollbar
+#import os
+#import rollbar
+#import rollbar.contrib.flask
+#from flask import got_request_exception
+ 
 #Honeycomb----------------
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
@@ -161,6 +167,8 @@ def data_activities_reply(activity_uuid):
   else:
     return model['data'], 200
   return
+
+
 
 if __name__ == "__main__":
   app.run(debug=True)
