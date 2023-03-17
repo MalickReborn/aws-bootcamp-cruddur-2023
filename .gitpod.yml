@@ -21,6 +21,8 @@ tasks:
     command: |
       export GITPOD_IP=$(curl ifconfig.me)
       source  "$THEIA_WORKSPACE_ROOT/backend-flask/db-update-sg-rule"
+      sudo apt update
+      sudo apt install -y postgresql postgresql-contrib 
 vscode:
   extensions:
     - 42Crunch.vscode-openapi
