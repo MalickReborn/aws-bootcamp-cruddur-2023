@@ -13,3 +13,5 @@ requests
 
 rollbar
 blinker
+
+Flask-AWSCognito 
