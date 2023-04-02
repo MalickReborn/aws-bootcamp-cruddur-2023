@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta, timezone
 from opentelemetry import trace
 from lib.db import pool, query_wrap_object, query_wrap_array

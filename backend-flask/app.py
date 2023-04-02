@@ -5,6 +5,7 @@ import os
 import sys
 
 from services.home_activities import *
+from services.notifications_activities import *
 from services.user_activities import *
 from services.create_activity import *
 from services.create_reply import *
@@ -15,7 +16,6 @@ from services.create_message import *
 from services.show_activity import *
 
 from lib.cognito_jwt_token import CognitoJwtToken, extract_access_token, TokenVerifyError
-
 
 # HoneyComb ---------
 from opentelemetry import trace
@@ -70,11 +70,6 @@ tracer = trace.get_tracer(__name__)
 
 app = Flask(__name__)
 
-cognito_jwt_token = CognitoJwtToken(
-  user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"), 
-  user_pool_client_id=os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID"),
-  region=os.getenv("AWS_DEFAULT_REGION")
-)
 
 # X-RAY ----------
 XRayMiddleware(app, xray_recorder)
@@ -94,6 +89,12 @@ cors = CORS(
   headers=['Content-Type', 'Authorization'], 
   expose_headers='Authorization',
   methods="OPTIONS,GET,HEAD,POST"
+)
+
+cognito_jwt_token = CognitoJwtToken(
+  user_pool_id=os.getenv('AWS_COGNITO_USER_POOL_ID'), 
+  user_pool_client_id=os.getenv('AWS_COGNITO_USER_POOL_CLIENT_ID'),
+  region=os.getenv('AWS_DEFAULT_REGION')
 )
 
 # CloudWatch Logs -----
@@ -167,15 +168,15 @@ def data_home():
   access_token = extract_access_token(request.headers)
   try:
     claims = cognito_jwt_token.verify(access_token)
-    # authenicatied request
-    app.logger.debug("authenicated")
+    # authenticated request
+    app.logger.debug("authenticated")
     app.logger.debug(claims)
     app.logger.debug(claims['username'])
     data = HomeActivities.run(cognito_user_id=claims['username'])
   except TokenVerifyError as e:
-    # unauthenicatied request
+    # unauthenticated request
     app.logger.debug(e)
-    app.logger.debug("unauthenicated")
+    app.logger.debug("unauthenticated")
     data = HomeActivities.run()
   return data, 200
 

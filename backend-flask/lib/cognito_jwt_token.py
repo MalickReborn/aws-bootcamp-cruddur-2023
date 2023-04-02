@@ -36,6 +36,8 @@ class CognitoJwtToken:
         keys_url = f"https://cognito-idp.{self.region}.amazonaws.com/{self.user_pool_id}/.well-known/jwks.json"
         try:
             response = self.request_client(keys_url)
+            print("response statut-----------------")
+            print(response)
             self.jwk_keys = response.json()["keys"]
         except requests.exceptions.RequestException as e:
             raise FlaskAWSCognitoError(str(e)) from e
@@ -96,7 +98,7 @@ class CognitoJwtToken:
         audience = claims["aud"] if "aud" in claims else claims["client_id"]
         if audience != self.user_pool_client_id:
             raise TokenVerifyError("Token was not issued for this audience")
-    
+
     def verify(self, token, current_time=None):
         """ https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.py """
         if not token:
@@ -111,4 +113,4 @@ class CognitoJwtToken:
         self._check_audience(claims)
 
         self.claims = claims 
-        return claims
+        return 

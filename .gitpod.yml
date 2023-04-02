@@ -11,7 +11,7 @@ tasks:
   - name: react-js
     command: |
       cd frontend-react-js
-      npm i
+      npm install -g npm@9.6.2
   - name: postgres
     init: |
       curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
@@ -19,11 +19,8 @@ tasks:
       sudo apt update
       sudo apt install -y postgresql-client-13 libpq-dev
     command: |
-      sudo apt update
-      sudo apt install -y postgresql postgresql-contrib
       export GITPOD_IP=$(curl ifconfig.me)
-      source  "$THEIA_WORKSPACE_ROOT/backend-flask/bin/rds-update-sg-rule"
-       
+      source  "$THEIA_WORKSPACE_ROOT/backend-flask/db-update-sg-rule"
 vscode:
   extensions:
     - 42Crunch.vscode-openapi
