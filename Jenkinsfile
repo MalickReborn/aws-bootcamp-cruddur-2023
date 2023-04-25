@@ -3,12 +3,12 @@ agent any
 stages{
   stage("Build"){
     steps{
-      sh 'opt/maven/bin/mvn' clean install'
+      sh 'opt/maven/bin/mvn clean install'
     }
   }
   stage("Test"){
     steps{
-       sh 'opt/maven/bin/mvn' clean test'
+       sh 'opt/maven/bin/mvn clean test'
     }
  }
 }
